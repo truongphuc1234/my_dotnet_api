@@ -9,11 +9,15 @@ namespace Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAccountService _accountService;
-    public AuthController(IAccountService accountService)
+    private readonly IAuthService _authService;
+    private readonly ITokenService _tokenService;
+    public AuthController(IAccountService accountService, IAuthService authService, ITokenService tokenService)
     {
         _accountService = accountService;
-
+        _authService = authService;
+        _tokenService = tokenService;
     }
+
     [HttpPost("Login")]
     public async Task<ActionResult> Login(LoginRequestDto loginRequest)
     {
@@ -23,12 +27,20 @@ public class AuthController : ControllerBase
         {
             return BadRequest("User is not existed");
         }
-        
-    }
 
-    [HttpPost("Logout")]
-    public ActionResult Logout()
-    {
-        return Ok();
+        var loginResult = await _authService.Login(user, loginRequest.Password);
+        if (!loginResult.Succeeded)
+        {
+            return Unauthorized();
+        }
+
+        return Ok(
+            new UserDto
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Token = await _tokenService.CreateTokenAsync(user)
+            }
+        );
     }
 }

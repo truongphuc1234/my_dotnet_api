@@ -8,17 +8,14 @@ namespace Api.Services;
 public class AuthService : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
-    public AuthService(UserManager<AppUser> userManager)
+    private readonly SignInManager<AppUser> _signInManager;
+    public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
     }
-    public Task<UserDto> Login(string username, string password)
+    public async Task<SignInResult> Login(AppUser user, string password)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> Logout()
-    {
-        _userManager.
+        return await _signInManager.CheckPasswordSignInAsync(user, password, false);
     }
 }
