@@ -71,7 +71,7 @@ public class AccountController : ControllerBase
         {
             return BadRequest(result.Errors);
         }
-
+    
         var roleResult = await _accountService.AddToRoleAsync(user, "Member");
 
         if (!roleResult.Succeeded)
