@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Api.Dtos;
 using Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,14 @@ public class AuthController : ControllerBase
     private readonly IAccountService _accountService;
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
-    public AuthController(IAccountService accountService, IAuthService authService, ITokenService tokenService)
+    private readonly IUserProfileService _userProfileService;
+
+    public AuthController(IAccountService accountService, IAuthService authService, ITokenService tokenService, IUserProfileService userProfileService)
     {
         _accountService = accountService;
         _authService = authService;
         _tokenService = tokenService;
+        _userProfileService = userProfileService;
     }
 
     [HttpPost("Login")]

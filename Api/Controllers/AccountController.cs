@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Api.Dtos;
 using Api.Entities;
 using Api.Interfaces;
@@ -13,11 +14,13 @@ public class AccountController : ControllerBase
     private readonly IAccountService _accountService;
     private readonly IMapper _mapper;
     private readonly ITokenService _tokenService;
-    public AccountController(IAccountService accountService, IMapper mapper, ITokenService tokenService)
+    private readonly IUserProfileService _userProfileService;
+    public AccountController(IAccountService accountService, IMapper mapper, ITokenService tokenService, IUserProfileService userProfileService)
     {
         _accountService = accountService;
         _mapper = mapper;
         _tokenService = tokenService;
+        _userProfileService = userProfileService;
     }
 
     [HttpPost(Name = "confirm-email")]
@@ -28,24 +31,6 @@ public class AccountController : ControllerBase
 
     [HttpPut("change-password")]
     public ActionResult ChangePasword(ChangePasswordDto changePasswordDto)
-    {
-        return Ok();
-    }
-
-    [HttpPut("update-status")]
-    public ActionResult UpdateStatus(string status)
-    {
-        return Ok();
-    }
-
-    [HttpPut("edit-avatar")]
-    public ActionResult UpdateAvatar(string avatarUrl)
-    {
-        return Ok();
-    }
-
-    [HttpPut("edit-backgroud")]
-    public ActionResult UpdateBackground(string avatarUrl)
     {
         return Ok();
     }
@@ -71,7 +56,7 @@ public class AccountController : ControllerBase
         {
             return BadRequest(result.Errors);
         }
-    
+
         var roleResult = await _accountService.AddToRoleAsync(user, "Member");
 
         if (!roleResult.Succeeded)
@@ -80,6 +65,7 @@ public class AccountController : ControllerBase
         }
 
         user = await _accountService.GetUserByUserNameAsync(user.UserName);
+        await _userProfileService.CreateUserProfile(user);
 
         return Ok(new UserDto
         {

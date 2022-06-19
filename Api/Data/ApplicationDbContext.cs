@@ -11,6 +11,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int, Ide
     {
     }
 
+    public DbSet<UserProfile> UserProfiles  => Set<UserProfile>();
+    public DbSet<Image> Images => Set<Image>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -26,5 +29,13 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int, Ide
             .WithOne(u => u.Role)
             .HasForeignKey(ur => ur.RoleId)
             .IsRequired();
+
+        builder.Entity<UserProfile>()
+            .HasOne(up => up.User);
+
+        builder.Entity<UserProfile>()
+            .HasMany(up => up.Images)
+            .WithOne(i => i.User)
+            .HasForeignKey(i => i.UserId);
     }
 }
