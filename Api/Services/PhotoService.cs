@@ -22,21 +22,26 @@ public class PhotoService : IPhotoService
     {
         _userManager = userManager;
         _context = context;
-        _cloudinary = new Cloudinary(new Account(config["CloudinaryUrl"]));
+        var configObject = config.GetSection("Cloudinary");
+        _cloudinary = new Cloudinary(new Account(configObject.GetSection("CLOUD_NAME").Value, configObject.GetSection("API_KEY").Value, configObject.GetSection("API_SECRET").Value));
     }
     public async Task<int> UploadPhotoAsync(IFormFile file, UserProfile user)
     {
-        var results = new List<Dictionary<string, string>>();
-
         if (file == null || file.Length == 0)
         {
             return 0;
         }
+        var result = new ImageUploadResult();
 
-        var result = await _cloudinary.UploadAsync(new ImageUploadParams
+
+        using (var stream = file.OpenReadStream())
         {
-            File = new FileDescription(file.FileName, file.OpenReadStream()),
-        });
+
+            result = await _cloudinary.UploadAsync(new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+            });
+        }
 
         if (result == null)
         {
@@ -50,7 +55,7 @@ public class PhotoService : IPhotoService
             Url = result.Url.AbsoluteUri,
             IsAvatar = false,
             IsBackGround = false,
-            UserId = user.UserId
+            UserId = user.Id
         };
 
         _context.Images.Add(image);
